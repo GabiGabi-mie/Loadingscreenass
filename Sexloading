@@ -39,7 +39,7 @@ loadingText.Font = Enum.Font.GothamBlack
 loadingText.Text = "Loading... 0%"
 loadingText.Parent = background
 
--- Progress bar frame
+-- Progress bar background
 local progressBarBackground = Instance.new("Frame")
 progressBarBackground.Size = UDim2.new(0, 400, 0, 20)
 progressBarBackground.Position = UDim2.new(0.5, -200, 0.5, 40)
@@ -47,7 +47,7 @@ progressBarBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 progressBarBackground.BorderSizePixel = 0
 progressBarBackground.Parent = background
 
--- Actual progress bar
+-- Progress bar fill
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 0, 1, 0)
 progressBar.Position = UDim2.new(0, 0, 0, 0)
@@ -55,18 +55,19 @@ progressBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 progressBar.BorderSizePixel = 0
 progressBar.Parent = progressBarBackground
 
--- Warning Message (initially invisible)
+-- Scary Warning Message (AT THE START)
 local warningLabel = Instance.new("TextLabel")
-warningLabel.Size = UDim2.new(1, 0, 0, 60)
-warningLabel.Position = UDim2.new(0, 0, 0.65, 50)
+warningLabel.Size = UDim2.new(1, -40, 0, 60)
+warningLabel.Position = UDim2.new(0.5, -200, 0.65, 80)
 warningLabel.BackgroundTransparency = 1
 warningLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 warningLabel.TextScaled = true
 warningLabel.Font = Enum.Font.GothamBold
-warningLabel.Text = ""
+warningLabel.Text = "⚠️ DON'T LEAVE THE GAME OR IT WILL NOT LOAD AGAIN WHEN YOU REJOIN."
+warningLabel.TextWrapped = true
 warningLabel.Parent = background
 
--- TweenService for smooth bar
+-- TweenService for smooth progress bar
 local TweenService = game:GetService("TweenService")
 
 -- Fake loading logic (10 minutes)
@@ -76,24 +77,21 @@ local timePerStep = totalTime / steps
 
 for i = 0, steps do
 	loadingText.Text = "Loading... " .. i .. "%"
-	
+
 	local progress = i / 100
 	local tween = TweenService:Create(progressBar, TweenInfo.new(timePerStep, Enum.EasingStyle.Linear), {
 		Size = UDim2.new(progress, 0, 1, 0)
 	})
 	tween:Play()
-	
+
 	task.wait(timePerStep)
 end
 
--- Once stuck at 100%
+-- Stuck at 100%
 loadingText.Text = "Loading... 100%"
 title.Text = "Finalizing Memory Sectors..."
 
--- Add dramatic scary message
-warningLabel.Text = "⚠️ DO NOT LEAVE THE GAME OR ELSE.\nIF YOU EXECUTE AGAIN IT WILL NOT LOAD BACK."
-
--- Stay stuck forever
+-- Keep GUI forever
 while true do
 	task.wait()
 end
