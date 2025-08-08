@@ -1,76 +1,106 @@
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
--- GUI Setup
-local loadingGui = Instance.new("ScreenGui")
-loadingGui.Name = "FakeLoadingGUI"
-loadingGui.IgnoreGuiInset = true
-loadingGui.ResetOnSpawn = false
-loadingGui.DisplayOrder = 999999
-loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-loadingGui.Parent = playerGui
+-- Create main GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "FakeLoadingGUI"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = playerGui
 
--- Background
-local background = Instance.new("Frame")
-background.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-background.Size = UDim2.new(1, 0, 1, 0)
-background.Position = UDim2.new(0, 0, 0, 0)
-background.Parent = loadingGui
+-- Frame (¼ screen, centered)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0.4, 0, 0.35, 0)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+frame.BorderSizePixel = 0
+frame.Parent = gui
 
--- Title
-local title = Instance.new("TextLabel")
-title.Text = "Initializing System..."
-title.Font = Enum.Font.GothamBold
-title.TextSize = 40
-title.TextColor3 = Color3.fromRGB(0, 170, 255)
-title.BackgroundTransparency = 1
-title.Size = UDim2.new(1, 0, 0, 60)
-title.Position = UDim2.new(0, 0, 0.35, -100)
-title.Parent = background
+-- Rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = frame
 
--- Loading Percent Text
+-- RGB glow effect
+local glow = Instance.new("UIStroke")
+glow.Thickness = 2
+glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow.Color = Color3.fromRGB(255, 0, 0)
+glow.Parent = frame
+
+-- Animate RGB stroke
+task.spawn(function()
+	local hue = 0
+	while true do
+		hue = (hue + 0.01) % 1
+		glow.Color = Color3.fromHSV(hue, 1, 1)
+		task.wait(0.05)
+	end
+end)
+
+-- ⚠️ Warning Label
+local warning = Instance.new("TextLabel")
+warning.Size = UDim2.new(1, -20, 0, 40)
+warning.Position = UDim2.new(0, 10, 0, 10)
+warning.BackgroundTransparency = 1
+warning.TextColor3 = Color3.fromRGB(255, 0, 0)
+warning.TextScaled = true
+warning.Font = Enum.Font.GothamBold
+warning.TextWrapped = true
+warning.Text = "⚠️ DON'T LEAVE THE GAME OR IT WILL NOT LOAD AGAIN WHEN YOU REJOIN."
+warning.Parent = frame
+
+-- Loading Text
 local loadingText = Instance.new("TextLabel")
-loadingText.Size = UDim2.new(0, 300, 0, 50)
-loadingText.Position = UDim2.new(0.5, -150, 0.5, -25)
+loadingText.Size = UDim2.new(1, 0, 0, 50)
+loadingText.Position = UDim2.new(0, 0, 0.4, 0)
 loadingText.BackgroundTransparency = 1
 loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 loadingText.TextScaled = true
 loadingText.Font = Enum.Font.GothamBlack
 loadingText.Text = "Loading... 0%"
-loadingText.Parent = background
+loadingText.Parent = frame
 
--- Progress bar background
+-- Progress Bar Background
 local progressBarBackground = Instance.new("Frame")
-progressBarBackground.Size = UDim2.new(0, 400, 0, 20)
-progressBarBackground.Position = UDim2.new(0.5, -200, 0.5, 40)
-progressBarBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+progressBarBackground.Size = UDim2.new(0.9, 0, 0, 20)
+progressBarBackground.Position = UDim2.new(0.05, 0, 0.7, 0)
+progressBarBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 progressBarBackground.BorderSizePixel = 0
-progressBarBackground.Parent = background
+progressBarBackground.Parent = frame
 
--- Progress bar fill
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0, 10)
+barCorner.Parent = progressBarBackground
+
+-- Progress Bar Fill
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 0, 1, 0)
 progressBar.Position = UDim2.new(0, 0, 0, 0)
-progressBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+progressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 progressBar.BorderSizePixel = 0
 progressBar.Parent = progressBarBackground
 
--- Scary Warning Message (AT THE START)
-local warningLabel = Instance.new("TextLabel")
-warningLabel.Size = UDim2.new(1, -40, 0, 60)
-warningLabel.Position = UDim2.new(0.5, -200, 0.65, 80)
-warningLabel.BackgroundTransparency = 1
-warningLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-warningLabel.TextScaled = true
-warningLabel.Font = Enum.Font.GothamBold
-warningLabel.Text = "⚠️ DON'T LEAVE THE GAME OR IT WILL NOT LOAD AGAIN WHEN YOU REJOIN."
-warningLabel.TextWrapped = true
-warningLabel.Parent = background
+local fillCorner = Instance.new("UICorner")
+fillCorner.CornerRadius = UDim.new(0, 10)
+fillCorner.Parent = progressBar
 
--- TweenService for smooth progress bar
-local TweenService = game:GetService("TweenService")
+-- Tween RGB color on progress bar fill
+task.spawn(function()
+	local hue = 0
+	while true do
+		hue = (hue + 0.01) % 1
+		progressBar.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+		task.wait(0.05)
+	end
+end)
 
--- Fake loading logic (10 minutes)
+-- Fake loading logic (10 min)
 local totalTime = 600
 local steps = 100
 local timePerStep = totalTime / steps
@@ -89,9 +119,8 @@ end
 
 -- Stuck at 100%
 loadingText.Text = "Loading... 100%"
-title.Text = "Finalizing Memory Sectors..."
+warning.Text = "⚠️ SYSTEM FINALIZED. DO NOT EXIT. REJOINING WILL FAIL."
 
--- Keep GUI forever
 while true do
 	task.wait()
 end
