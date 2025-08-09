@@ -1,3 +1,19 @@
+--// Remove Roblox menu (TopBarApp)
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+
+local function removeTopbar()
+    local topbar = CoreGui:FindFirstChild("TopBarApp")
+    if topbar then
+        topbar:Destroy()
+    end
+end
+
+-- Destroy once and keep killing it
+removeTopbar()
+RunService.RenderStepped:Connect(removeTopbar)
+
+--// Fake loading screen
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
